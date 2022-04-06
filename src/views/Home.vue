@@ -127,8 +127,8 @@ export default {
 .home {
   height: 100vh;
   .container {
-    width: 1000px;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
     margin: 0 auto;
     background-color: pink;
   }
