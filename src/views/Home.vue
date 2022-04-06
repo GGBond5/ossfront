@@ -1,38 +1,39 @@
 <template>
   <div class="home">
-    <div class="showSkip" v-for="(item, index) in storage.fileList" :key="index">
-      <span>{{item.url}}</span>
-      <span v-if="item.url">
-        <el-button type="success" icon="el-icon-check" @click="toVideo(item.url)" circle></el-button>
-      </span>
+    <div class="container">
+      <div class="showSkip" v-for="(item, index) in storage.fileList" :key="index">
+        <span>{{item.url}}</span>
+        <span v-if="item.url">
+          <el-button type="success" icon="el-icon-check" @click="typeSelection(item.url)" circle></el-button>
+        </span>
+      </div>
+      <div class="imgUpLoad">
+        <!-- before-upload   上传文件之前的钩子 -->
+        <el-upload
+          class="upload-demo"
+          :action="objData.host"
+          :before-upload="beUpload"
+          :on-success="success"
+          :data="objData"
+          :file-list="storage.fileList"
+          list-type="picture">
+          <el-button size="small" type="primary">点击上传</el-button>
+        </el-upload>
+      </div>
+      <!-- 图片预览 -->
+      <el-image-viewer v-if="showViewer" :on-close="showViewerClose" :url-list="[guidePic]"></el-image-viewer>
     </div>
-     <div class="imgUpLoad">
-       <!-- before-upload   上传文件之前的钩子 -->
-      <el-upload
-        class="upload-demo"
-        :action="objData.host"
-        :before-upload="beUpload"
-        :on-success="success"
-        :data="objData"
-        :file-list="storage.fileList"
-        list-type="picture">
-        <el-button size="small" type="primary">点击上传</el-button>
-      </el-upload>
-     </div>
   </div>
 </template>
 
 <script>
 import {mapGetters, mapActions} from 'vuex'
+import ElImageViewer from 'element-ui/packages/image/src/image-viewer'
 export default {
   data() {
     return {
-      fileList: [
-        // {name: 'food.jpeg', 
-        // url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'},
-        // {name: 'food2.jpeg', 
-        // url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'}
-        ],
+      showViewer: false,
+      guidePic: '', 
       objData: {
         OSSAccessKeyId: '',     //required
         policy: '',             //required
@@ -98,7 +99,38 @@ export default {
         }
       })
     },
+	showViewerClose(){
+		this.showViewer = false 
+	}, 
+	getPreview (url){ 
+    this.guidePic = url
+		this.guidePic ? this.showViewer = true: this.$message.info('当前没有可预览的图片')
+	},
+  typeSelection (url) {
+    let suffix = url.split('.')[url.split('.').length - 1].toLocaleUpperCase()
+    let allImgSuffix = ['BMP','GIF','JPEG','TIFF','PSD','PNG','SWF','SVG','JPG','hsb']
+    console.log(suffix);
+    //如果是图片则预览，否则当作视频
+    if (allImgSuffix.includes(suffix)) {
+      this.getPreview(url)
+    }else {
+      this.toVideo(url) 
+    }
+  },
     ...mapActions(['saveStorage'])
-  }
+  },
+  components:{ ElImageViewer }
 }
 </script>
+
+<style lang="less" scoped>
+.home {
+  height: 100vh;
+  .container {
+    width: 1000px;
+    height: 100%;
+    margin: 0 auto;
+    background-color: pink;
+  }
+}
+</style>
